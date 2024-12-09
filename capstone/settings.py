@@ -37,6 +37,7 @@ DEBUG = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
  
 ALLOWED_HOSTS = [
+    'web-production-45384.up.railway.app',
     'web-production-f8b86.up.railway.app',
     'localhost',
     '127.0.0.1',
