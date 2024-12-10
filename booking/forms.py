@@ -7,16 +7,16 @@ from .utilities import check_free_time
 class PetForm (forms.ModelForm):
     class Meta:
         model = Pet
-        fields = ('name','size','date_of_birth','breed')
+        fields = ('nombre','tamaño','fecha_de_nacimiento','raza')
         widgets = {
-            'date_of_birth': forms.DateInput(format=('%Y/%m/%d'), attrs={'type': 'date'}),
+            'fecha_de_nacimiento': forms.DateInput(format=('%Y/%m/%d'), attrs={'type': 'date'}),
         }
 
     def clean(self):
-        if self.cleaned_data["date_of_birth"] is None:
-            raise forms.ValidationError("Please input a date")
-        elif self.cleaned_data["date_of_birth"] > datetime.today().date():
-            raise forms.ValidationError("The date cannot be in the future")
+        if self.cleaned_data["fecha_de_nacimiento"] is None:
+            raise forms.ValidationError("Por favor introduce una fecha")
+        elif self.cleaned_data["fecha_de_nacimiento"] > datetime.today().date():
+            raise forms.ValidationError("La fecha no puede ser en el futuro")
        
         return self.cleaned_data
 
@@ -104,11 +104,13 @@ class AppointmentForm(forms.ModelForm):
         super(AppointmentForm, self).__init__(*args, **kwargs)
         # Llama al constructor de la clase base `ModelForm`.
 
-        self.fields['dog'].label = "Pet Name"
+        self.fields['dog'].label = "Nombre de la mascota"
         # Cambia la etiqueta del campo `dog` a "Pet Name".
-        self.fields['time'].label = "Time Slot"
+        self.fields['time'].label = "Hora"
         # Cambia la etiqueta del campo `time` a "Time Slot".
-        self.fields['add_ons'].label = "Add-on Services"
+        self.fields['add_ons'].label = "Servicios adicionales"
         # Cambia la etiqueta del campo `add_ons` a "Add-on Services".
+        self.fields['date'].label = "Fecha"
+        self.fields['service'].label = "Servicios"
 
         

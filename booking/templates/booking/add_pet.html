@@ -1,0 +1,52 @@
+{% extends 'booking/layout.html' %}
+{% load static %}
+
+{% block body %}
+<main class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="w-100 p-5 rounded shadow-lg" style="max-width: 500px; background-color: #f8d7da;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h1 class="mb-3 text-center text-dark">Agregar Mascota</h1>
+
+        <form class="p-4 bg-white rounded" action="{% url 'add_pet' %}" method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label fw-bold">Nombre de la mascota</label>
+                <input id="nombre" class="form-control" type="text" name="nombre" placeholder="Ej. Max" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="tamaño" class="form-label fw-bold">Tamaño</label>
+                <select id="tamaño" class="form-select" name="tamaño" required>
+                    <option value="" disabled selected>Selecciona el tamaño</option>
+                    <option value="S">Pequeño (Hasta 14 kg)</option>
+                    <option value="M">Mediano (14 - 23 kg)</option>
+                    <option value="L">Grande (Sobre 23 kg)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="fecha_de_nacimiento" class="form-label fw-bold">Fecha de nacimiento</label>
+                <input id="fecha_de_nacimiento" class="form-control" type="date" name="fecha_de_nacimiento">
+            </div>
+
+            <div class="mb-3">
+                <label for="raza" class="form-label fw-bold">Raza</label>
+                <input id="raza" class="form-control" type="text" name="raza" placeholder="Ej. Labrador" required>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Agregar Mascota</button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

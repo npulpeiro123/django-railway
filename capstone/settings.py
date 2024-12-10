@@ -171,3 +171,5 @@ broker_connection_retry_on_startup = True
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
 CSRF_TRUSTED_ORIGINS = ['http://*','https://web-production-f8b86.up.railway.app', 'https://web-production-45384.up.railway.app']
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'booking/static')]

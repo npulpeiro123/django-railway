@@ -13,36 +13,36 @@ class Owner(models.Model):
 
 class Pet(models.Model):
     SIZE_CHOICES = [
-        ("S", "Small (Up to 30 lbs)"),
-        ("M", "Medium (30 - 50 lbs)"),
-        ("L", "Large (50 lbs and Up)")
+        ("S", "Pequeño (Hasta 14 kg)"),
+        ("M", "Mediano (14 - 23 kg)"),
+        ("L", "Grande (Sobre 23 kg)")
     ]
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="owner")
-    name = models.CharField(max_length=50)
-    size = models.CharField(
+    nombre = models.CharField(max_length=50)
+    tamaño = models.CharField(
         max_length=20, choices=SIZE_CHOICES, default="")
-    date_of_birth = models.DateField(null=True, blank=True)
-    breed = models.CharField(max_length=50)
+    fecha_de_nacimiento = models.DateField(null=True, blank=True)
+    raza = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.name
+        return self.nombre
  
 
 class Appointment(models.Model):
     SERVICE_CHOICES = [
-        ("E", "Express Grooming"),
-        ("F", "Full Dog Grooming"),
-        ("P", "Spa Premium Grooming")
+        ("Peluquería Express", "Peluquería Express"),
+        ("Peluquería Completa", "Peluquería Completa"),
+        ("Peluquería Premium Spa", "Peluquería Premium Spa")
     ]
 
     ADDONS_CHOICES = [
-        (0, "None"),
-        (1, "Tooth Brushing"),
-        (2, "De-matting"),
-        (3, "Blueberry Facial"),
-        (4, "Body massage"),
-        (5, "Hydro massage bath"),
-        (6, "Oatmeal or Aloe Conditioning"),
+        ("Ninguno", "Ninguno"),
+        ("Cepillado dental", "Cepillado dental"),
+        ("Desenmatado", "Desenmatado"),
+        ("Tratamiento facial", "Tratamiento facial"),
+        ("Masaje corporal", "Masaje corporal"),
+        ("Baño de hidromasaje", "Baño de hidromasaje"),
+        ("Acondicionador de avena y aloe vera", "Acondicionador de avena y aloe vera"),
     ]
 
     TIME_CHOICES = [
@@ -57,9 +57,9 @@ class Appointment(models.Model):
         Pet, on_delete=models.CASCADE, default="")
     date = models.DateField(default="", null=False) 
     time = models.IntegerField(choices=TIME_CHOICES, )
-    service = models.CharField(max_length=20, choices=SERVICE_CHOICES, default="E")
+    service = models.CharField(max_length=40, choices=SERVICE_CHOICES, default="E")
     add_ons = MultiSelectField(
-        choices=ADDONS_CHOICES, max_choices=6, max_length=11, default=0)
+        choices=ADDONS_CHOICES, max_choices=6, max_length=50, default="")
     remarks = models.CharField(max_length=200, null = True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -73,7 +73,7 @@ class Appointment(models.Model):
         return {
             "id": self.id,
             "user": self.user.id,
-            "dog": self.dog.name,
+            "dog": self.dog.nombre,
             "date": self.date.strftime("%b %#d %Y (%a)"),
             "time": self.get_time_display(),
             "service": self.get_service_display(),
@@ -104,7 +104,7 @@ class Notification(models.Model):
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, null=True, blank=True)  # Agregado
 
     def __str__(self):
-        return f"Notification for {self.user.username} - {self.message[:30]}"
+        return f"Notification for {self.user.usernombre} - {self.message[:30]}"
 
 class Galeria(models.Model):
     title=models.CharField(max_length=41)

@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -12,7 +12,7 @@ from .forms import PetForm, AppointmentForm
 from .utilities import load_preview_dict
 from django.http import JsonResponse
 
-from django.utils.timezone import now
+from django.utils import timezone
 from booking.models import Notification
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_protect
@@ -162,6 +162,16 @@ def register(request):
         return render(request, 'booking/register.html')
 
 
+def detalle_cita(request, booking_id):
+    # Obtener la cita por el booking_id
+    appointment = get_object_or_404(Appointment, id=booking_id)
+
+    # Pasar los datos a la plantilla
+    context = {
+        'appointment': appointment,
+    }
+    return render(request, 'booking/detalle_cita.html', context)
+
 
 
 @login_required(login_url='/login')
@@ -275,6 +285,68 @@ def change_password(request):
 
 
 
+
+@login_required
+def add_pet(request):
+    if request.method == "POST":
+        # Obtener la instancia de Owner relacionada con el usuario
+        try:
+            owner = Owner.objects.get(user=request.user)
+        except Owner.DoesNotExist:
+            messages.error(request, "No se encontró un perfil de dueño asociado con tu cuenta.")
+            return redirect('profile')
+
+        # Obtener los datos del formulario
+        nombre = request.POST.get('nombre')
+        tamaño = request.POST.get('tamaño')
+        fecha_de_nacimiento_str = request.POST.get('fecha_de_nacimiento')  # Fecha en formato de string
+        raza = request.POST.get('raza')
+
+        # Convertir la fecha de nacimiento de string a datetime.date
+        try:
+            fecha_de_nacimiento = datetime.strptime(fecha_de_nacimiento_str, '%Y-%m-%d').date()
+        except ValueError:
+            messages.error(request, "La fecha de nacimiento no es válida.")
+            return redirect('add_pet')
+
+        # Validar que la fecha de nacimiento no sea en el futuro
+        if fecha_de_nacimiento > timezone.now().date():
+            messages.error(request, "La fecha de nacimiento no puede ser en el futuro.")
+            return redirect('add_pet')
+
+        # Crear una nueva mascota con los datos proporcionados
+        pet = Pet(
+            owner=owner,
+            nombre=nombre,
+            tamaño=tamaño,
+            fecha_de_nacimiento=fecha_de_nacimiento,
+            raza=raza
+        )
+
+        # Guardar la mascota en la base de datos
+        pet.save()
+
+        messages.success(request, "Mascota agregada exitosamente.")
+        return redirect('profile')
+
+    return render(request, 'booking/add_pet.html')
+
+@login_required
+def delete_pet(request, pet_id):
+    # Obtener la mascota a eliminar, solo si pertenece al usuario actual
+    pet = get_object_or_404(Pet, id=pet_id, owner__user=request.user)
+
+    # Eliminar la mascota
+    pet.delete()
+
+    messages.success(request, "Mascota eliminada exitosamente.")
+    return redirect('profile')
+
+def cancel_booking(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    appointment.delete()
+    return redirect(reverse('profile'))
+
 @login_required(login_url='/login')
 def booking(request):
     # Obtener notificaciones no leídas
@@ -295,8 +367,8 @@ def booking(request):
     # Inicializa un diccionario para almacenar los horarios disponibles para cada día.
 
     for date in date_list:
-        if date.weekday() == 7:
-            slot_dict[date] = 'Cerrado'
+        if date.weekday() == 6:
+            slot_dict[date] = 'Closed'
         else:
             time_list = [10, 13, 15]
             # Define una lista con los posibles horarios para las citas (10 AM, 1 PM, 3 PM).
@@ -369,17 +441,17 @@ def booking(request):
             # Crea una instancia del formulario de mascota con los datos del formulario enviado.
 
             if petform.is_valid():
-                name = petform.cleaned_data["name"]
-                size = petform.cleaned_data["size"]
-                date_of_birth = petform.cleaned_data["date_of_birth"]
-                breed = petform.cleaned_data["breed"].title()
+                nombre = petform.cleaned_data["nombre"]
+                tamaño = petform.cleaned_data["tamaño"]
+                fecha_de_nacimiento = petform.cleaned_data["fecha_de_nacimiento"]
+                raza = petform.cleaned_data["raza"].title()
                 # Obtiene los datos del formulario de mascota y los procesa.
 
-                Pet.objects.create(owner=owner, name=name, size=size,
-                                   date_of_birth=date_of_birth, breed=breed)
+                Pet.objects.create(owner=owner, nombre=nombre, tamaño=tamaño,
+                                   fecha_de_nacimiento=fecha_de_nacimiento, raza=raza)
                 # Crea una nueva mascota en la base de datos.
 
-                messages.success(request, f"{name} se añadió correctamente.")
+                messages.success(request, f"{nombre} se añadió correctamente.")
                 # Muestra un mensaje de éxito informando que la mascota se ha añadido correctamente.
 
                 return render(request, 'booking/booking.html', {
@@ -407,9 +479,6 @@ def booking(request):
             "notifications": notifications,
         })
         # Renderiza la plantilla de reservas con los formularios de cita y mascota vacíos y las fechas disponibles.
-
-
-
 
 
 # Asegura que solo los usuarios autenticados puedan acceder a la vista. Redirige al usuario no autenticado a la página de inicio de sesión.

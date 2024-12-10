@@ -17,4 +17,8 @@ urlpatterns= [
     path('appointment/<int:id>', views.appointment, name="appointment"),
     path('schedule/<date:start>/<str:move>', views.schedule, name="schedule"),
     path('mark-notification-read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
+    path('add_pet', views.add_pet, name="add_pet"),
+    path('detalle-cita/<int:booking_id>/', views.detalle_cita, name='detalle_cita'),
+    path('eliminar-cita/<int:appointment_id>/', views.cancel_booking, name='cancel_booking'),
+    path('delete_pet/<int:pet_id>/', views.delete_pet, name='delete_pet'),
 ]

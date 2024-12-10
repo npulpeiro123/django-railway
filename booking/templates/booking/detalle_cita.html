@@ -1,0 +1,44 @@
+{% extends 'booking/layout.html' %}
+{% load static %}
+
+{% block body %}
+<section class="details container mt-4 p-4 rounded shadow-sm" style="background-color: #f8d7da;">
+    <h2 class="mb-4 text-center">Detalles de la Cita Ref# {{ appointment.id|stringformat:"05d" }}</h2>
+
+    <!-- Fila para la fecha y hora -->
+    <div class="row mb-3">
+        <div class="col">
+            <p><strong>Fecha y hora:</strong> {{ appointment.date|date:"M d, Y (D)" }} a las {{ appointment.get_time_display }}</p>
+        </div>
+    </div>
+
+    <!-- Fila para el servicio -->
+    <div class="row mb-3">
+        <div class="col">
+            <p><strong>Servicio:</strong> {{ appointment.service }}</p>
+        </div>
+    </div>
+
+    <!-- Fila para los servicios adicionales -->
+    <div class="row mb-3">
+        <div class="col">
+            <p><strong>Servicios adicionales:</strong> 
+                <ul class="list-unstyled">
+                    {% for addon in appointment.add_ons. %}
+                        <li>{{ addon }}</li>
+                    {% empty %}
+                        <li>No hay servicios adicionales.</li>
+                    {% endfor %}
+                </ul>
+            </p>
+        </div>
+    </div>
+
+    <!-- Fila para los botones de Editar y Eliminar -->
+    <div class="row mb-3">
+        <div class="col text-center">
+            <a href="{% url 'cancel_booking' appointment.id %}" class="btn btn-danger">Eliminar Cita</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

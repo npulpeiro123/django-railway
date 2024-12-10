@@ -3,24 +3,38 @@
 
 {% block body %}
 
-<div class="container display-flex" >
-    <div class="row width=100%">
-        {% for galeria in page_obj %}
-            <div class="col-md-4 mb-4">
-                <div class="card" style="width: 18rem;">
-                    <img src="{{ galeria.image.url }}" class="card-img-top" height="300px" width="250px" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ galeria.title }}</h5>
-                        <p class="card-text">{{ galeria.description }} {{ galeria.created }}</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
-                    </div>
+<div class="container gallery">
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{% static 'booking/imagenes/perro1.png' %}" alt="Hashi">
+                <div class="content">
+                    <h3>Hashi</h3>
+                    <p>Un poodle blanco y negro que se queda en nuestro hotel y viene a peluquería.</p>
                 </div>
             </div>
-        {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{% static 'booking/imagenes/perro2.png' %}" alt="Skye">
+                <div class="content">
+                    <h3>Skye</h3>
+                    <p>Nuestra pequeña Skye 🥰🐩 tan coqueta.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{% static 'booking/imagenes/perro6.png' %}" alt="Kiki">
+                <div class="content">
+                    <h3>Kiki</h3>
+                    <p>Hermoso el Kiki 💕 Quedó pituco para los papis.</p>
+                </div>
+            </div>
+        </div>
     </div>
-    
-   
-  
 </div>
 
 <div class="row">

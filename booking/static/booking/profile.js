@@ -110,78 +110,17 @@ function updateDatabase(field) {
     });
 }
 
-// Appointment details in modal
-const details = document.querySelectorAll(".details-btn");
-const modal = document.querySelector(".modal");
-
-details.forEach((btn) => {
-  btn.addEventListener("click", (e) => {
-    modal.classList.add("show-modal");
-    // reset the display to be appointment details
-    modalDisplay("text");
-
-    // close modal
-    document
-      .querySelector(".modal__close-btn")
-      .addEventListener("click", () => {
-        modal.classList.remove("show-modal");
-      });
-
-    //fetch and fill content for modal
-    fetch(`/appointment/${e.target.id}`)
-      .then((response) => response.json())
-      .then((result) => {
-        if (result.error) {
-          modal.querySelector(
-            ".modal__text"
-          ).innerHTML = `<h4 class='center'>${result.error}</h4>`;
-        } else {
-          const { id, dog, date, time, service, add_ons, created } = result;
-
-          if (add_ons === "None") {
-            document.getElementById(
-              "add-ons"
-            ).innerHTML = `<li>${add_ons}</li>`;
-          } else {
-            let addOnsArr = add_ons.split(",");
-            let list = "";
-            for (let i = 0; i < addOnsArr.length; i++) {
-              list = list + `<li>${addOnsArr[i]}</li>`;
-            }
-            document.getElementById("add-ons").innerHTML = list;
-          }
-          document.getElementById("ref").textContent = id
-            .toString()
-            .padStart(5, "0");
-          document.getElementById(
-            "datetime"
-          ).textContent = `${time} on ${date}`;
-          document.getElementById("dog").textContent = dog;
-          document.getElementById("service").textContent = service;
-          document.getElementById("created").textContent = created;
-
-          document
-            .querySelector(".booking__btn-edit")
-            .addEventListener("click", () => editBooking(result));
-          document
-            .querySelector(".booking__btn-cancel")
-            .addEventListener("click", () => cancelBooking(id));
-        }
-      });
-  });
-});
-
+// Función para manejar la edición de la cita
 function editBooking(fields_value) {
-  modalDisplay("form");
+  modalDisplay("form");  // Muestra el formulario en el modal
 
-  // add-ons checkboxes behaviour - none box cannot be checked when other boxes are checked
+  // Comportamiento de los checkboxes de add-ons - no se puede marcar el "None" si otros están marcados
   const checkbox = document.querySelectorAll("input[type=checkbox]");
   checkbox.forEach((box) => {
     box.addEventListener("change", (e) => {
-      // when the None box is checked
+      // Cuando se marca el checkbox de "None"
       if (e.target.checked && e.target.value === "0") {
         checkbox.forEach((checkedbox) => {
-          console.log(checkedbox);
           if (checkedbox.value !== "0") {
             checkedbox.checked = false;
           }
@@ -196,12 +135,12 @@ function editBooking(fields_value) {
     });
   });
 
-  // prepopulate form with record from database
+  // Pre-poblar el formulario con los valores de la cita obtenidos de la base de datos
   for (const property in fields_value) {
     let field = document.getElementById(`id_${property}`);
     if (field) {
       if (field.tagName === "SELECT") {
-        // applicable for pet name, time, and service
+        // Para el nombre de la mascota, el tiempo y el servicio
         const options = field.querySelectorAll("option");
         options.forEach((option) => {
           if (option.innerText === fields_value[property]) {
@@ -209,21 +148,21 @@ function editBooking(fields_value) {
           }
         });
       } else if (field.tagName === "INPUT") {
-        // meaning it is a date field
+        // Si es un campo de fecha (date)
         field.value = new Date(fields_value[property]).toLocaleDateString(
           "en-CA",
           { year: "numeric", month: "2-digit", day: "2-digit" }
         );
       } else {
-        // add_ons services
+        // Para los servicios add-ons
         const list = fields_value["add_ons_list"];
         const checkboxes = field.querySelectorAll("input");
-        // uncheck all the boxes first, then check the checkboxes according to record
+        // Desmarcar todos los checkboxes primero, luego marcar los correspondientes a los valores
         checkboxes.forEach((box) => {
           box.checked = false;
         });
         if (list.includes("0") && list.length === 1) {
-          checkboxes[0].checked = true;
+          checkboxes[0].checked = true; // Marca el checkbox de "None"
         } else {
           checkboxes.forEach((box) => {
             if (list.includes(box.value)) {
@@ -234,14 +173,14 @@ function editBooking(fields_value) {
       }
     }
   }
+
+  // Manejar la actualización de la cita cuando se envíe el formulario
   document
     .querySelector(".modal__form")
-    .addEventListener("submit", (e) =>
-      updateAppointment(e, fields_value["id"])
-    );
+    .addEventListener("submit", (e) => updateAppointment(e, fields_value["id"]));
 }
 
-// update appointment details in database when revise form submitted
+// Función para manejar la actualización de la cita en la base de datos
 function updateAppointment(e, id) {
   e.preventDefault();
   const form = new FormData(e.target);
@@ -318,31 +257,71 @@ function cancelBooking(id) {
   });
 }
 
-// take care of what to display inside the modal
-function modalDisplay(element = "none") {
-  const form = document.querySelector(".modal__form");
-  const text = document.querySelector(".modal__text");
-  const msgDiv = document.querySelector(".modal__msg");
-  const modal = document.querySelector(".modal");
-  msgDiv && msgDiv.remove();
+// Función que actualiza y muestra el modal con la información de la cita
+function showModal(bookingId) {
+  // Obtener el modal
+  const modal = new bootstrap.Modal(document.getElementById('modalDetails')); // Usamos el constructor de Bootstrap Modal
+  modal.show(); // Mostrar el modal
 
-  if (element === "form") {
-    document.querySelector(".modal__form").style.display = "block";
-    document.querySelector(".modal__text").style.display = "none";
-  } else if (element === "text") {
-    document.querySelector(".modal__form").style.display = "none";
-    form.reset();
-    document.querySelector(".modal__text").style.display = "flex";
-  } else if (element === "msgDiv") {
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("modal__msg", "center");
-    document.querySelector(".modal__content").append(msgDiv);
-  } else {
-    modal.classList.remove("show-modal");
-    setTimeout(() => location.reload(), 1500);
-  }
+  // Simulamos que los datos de la reserva están disponibles. En un caso real, estos datos deberían obtenerse con AJAX
+  const appointmentData = {
+    bookingId: bookingId,
+    petName: "Nombre de la mascota", // Simulamos el nombre de la mascota
+    datetime: "Fecha y hora de la cita", // Simulamos la fecha y hora
+    service: "Servicio seleccionado", // Simulamos el servicio
+    created: "Fecha de creación", // Simulamos la fecha de creación
+    addOns: ["Adicional 1", "Adicional 2"] // Simulamos los servicios adicionales
+  };
+
+  // Actualizamos el contenido del modal con los datos de la cita
+  document.getElementById('modal-ref').textContent = appointmentData.bookingId;
+  document.getElementById('modal-datetime').textContent = appointmentData.datetime;
+  document.getElementById('modal-service').textContent = appointmentData.service;
+  document.getElementById('modal-created').textContent = appointmentData.created;
+
+  // Actualizamos la lista de servicios adicionales
+  const addOnsList = document.getElementById('modal-add-ons');
+  addOnsList.innerHTML = ''; // Limpiamos cualquier servicio anterior
+  appointmentData.addOns.forEach(service => {
+    const listItem = document.createElement('li');
+    listItem.textContent = service;
+    addOnsList.appendChild(listItem);
+  });
 }
 
+// Llamada a la función cuando se hace clic en el botón "Detalles"
+document.querySelectorAll('.details-btn').forEach(button => {
+  button.addEventListener('click', function(event) {
+    const appointmentId = this.getAttribute('data-appointment-id');
+    showModal(appointmentId);
+  });
+});
+
+// Eventos de los botones de detalles
+const detailsBtns = document.querySelectorAll(".details-btn");
+detailsBtns.forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    const appointmentId = e.target.id;
+    fetch(`/appointment/${appointmentId}`)
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.error) {
+          modal.querySelector(
+            ".modal__text"
+          ).innerHTML = `<h4 class='center'>${result.error}</h4>`;
+        } else {
+          // Pre-poblar los detalles de la cita en el modal
+          editBooking(result);
+        }
+      });
+  });
+});
+
+document.querySelector('.modal__close-btn').addEventListener('click', function() {
+  // Cuando se hace clic en el botón de cierre, ocultamos el modal
+  const modal = document.querySelector('.modal');
+  modal.style.display = 'none'; // Ocultar el modal
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   // Obtener todos los botones de "Marcar como leída"
